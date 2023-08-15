@@ -21,8 +21,8 @@ int main() {
 		cout << *it << endl;
 	}
 
-	info("size: %ld", vec.size());
-	info("capacity: %ld", vec.capacity());
+	info("size: %lld", vec.size());
+	info("capacity: %lld", vec.capacity());
 	
 	return 0;
 }
