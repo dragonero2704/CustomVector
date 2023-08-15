@@ -1,13 +1,11 @@
 #include <iostream>
 #include "macros.h"
 #include "CustomVector.h"
-
 #include <random>
 
-#include <vector>
 using namespace std;
 
-#define MAXN 1000
+#define MAXN 100000
 
 int main() {
 	srand(time(NULL));
@@ -23,13 +21,8 @@ int main() {
 		cout << *it << endl;
 	}
 
-	
-
 	info("size: %ld", vec.size());
 	info("capacity: %ld", vec.capacity());
-
-	vector<int> stdvec;
-	stdvec.
 	
-	
+	return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include "macros.h"
+
 template <class Value>
 class CustomVector {
 private:
@@ -17,23 +18,22 @@ private:
 	}
 
 	void buildArray() {
-		
 		if (this->array == nullptr) {
-			this->array = new Value[_capacity];
+			this->array = new Value[this->_capacity];
 			// set to 0
-			for (int i = 0; i < _capacity; i++) {
+			for (int i = 0; i < this->_capacity; i++) {
 				this->array[i] = 0;
 			}
 			return;
 		}
 		Value* tmp = this->array;
-		this->array = new Value[_capacity];
-		for (int i = 0; i < _capacity; i++) {
+		this->array = new Value[this->_capacity];
+		for (int i = 0; i < this->_capacity; i++) {
 			if (i < _size) {
-				array[i] = tmp[i];
+				this->array[i] = tmp[i];
 			}
 			else {
-				array[i] = 0;
+				this->array[i] = 0;
 			}
 		}
 		delete[] tmp;
@@ -130,21 +130,6 @@ public:
 		return this->_capacity;
 	}
 
-	Value* cbegin() {
-		return this->array;
-	}
-
-	Value* cend() {
-		return this->array + this->_size;
-	}
-
-	Value* crbegin() {
-		return this->array + (this->_size - 1);
-	}
-	Value* crend() {
-		return this->array - 1;
-	}
-
 	Value* data() {
 		return this->array;
 	}
@@ -210,6 +195,14 @@ public:
 		return Iterator();
 	}
 
+	Iterator cbegin()  {
+		return this->begin();
+	}
+
+	Iterator cend()  {
+		return this->end();
+	}
+
 	class ReverseIterator {
 	private:
 		Value* ptr;
@@ -261,10 +254,20 @@ public:
 			this->ptr = other->ptr;
 		}
 	};
+	
 	ReverseIterator rbegin() {
 		return ReverseIterator(this->array, this->array + this->_size);
 	}
+	
 	ReverseIterator rend() {
 		return ReverseIterator();
 	}
+
+	ReverseIterator crbegin() {
+		return this->rbegin();
+	}
+	ReverseIterator crend() {
+		return this->rend();
+	}
 };
+
