@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.sass": "sass",
+        "iostream": "cpp",
+        "random": "cpp"
+    }
+}

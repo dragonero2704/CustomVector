@@ -1,6 +1,6 @@
 #include <iostream>
 #include "macros.h"
-#include "CustomVector.h"
+#include "CustomVector.hpp"
 #include <random>
 
 using namespace std;

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "macros.h"
 
+typedef unsigned long long size_t;
+
 template <class Value>
 class CustomVector {
 private:
