@@ -1,86 +1,135 @@
-#pragma once
 #include <stdio.h>
 #include "macros.h"
+#include <exception>
 
 typedef unsigned long long size_t;
 
 template <class Value>
-class CustomVector {
+class CustomVector
+{
 private:
 	size_t _capacity;
 	size_t _size;
-	Value* array;
+	Value *array;
 
-	unsigned long long int newCapacity(size_t number) {
+	unsigned long long int newCapacity(size_t number)
+	{
 		size_t tmp = 1;
-		while (tmp <= number) {
+		while (tmp < number)
+		{
 			tmp *= 2;
 		}
 		return tmp;
 	}
 
-	void buildArray() {
-		if (this->array == nullptr) {
+	void buildArray()
+	{
+		if (this->array == nullptr)
+		{
 			this->array = new Value[this->_capacity];
 			// set to 0
-			for (int i = 0; i < this->_capacity; i++) {
+			for (int i = 0; i < this->_capacity; i++)
+			{
 				this->array[i] = 0;
 			}
 			return;
 		}
-		Value* tmp = this->array;
+		Value *tmp = this->array;
 		this->array = new Value[this->_capacity];
-		for (int i = 0; i < this->_capacity; i++) {
-			if (i < _size) {
+		for (int i = 0; i < this->_capacity; i++)
+		{
+			if (i < _size)
+			{
 				this->array[i] = tmp[i];
 			}
-			else {
+			else
+			{
 				this->array[i] = 0;
 			}
 		}
 		delete[] tmp;
 	}
 
-public:
-	CustomVector() {
-		this->_size     = 0;
-		this->_capacity = 0;
-		this->array     = nullptr;
-	}
-	CustomVector(int size) {
-		this->_size     = size;
-		this->_capacity = size;
-		this->array     = new Value[_capacity];
-		for (int i = 0; i < _size; i++) 
+	class BaseIterator
+	{
+	protected:
+		Value *ptr;
+		Value *end;
+		Value *start;
+
+	public:
+		bool operator==(const BaseIterator &other)
 		{
-			this->array[i] = 0;
+			return this->ptr == other.ptr;
 		}
+
+		bool operator!=(const BaseIterator &other)
+		{
+			return this->ptr != other.ptr;
+		}
+
+		Value &operator*()
+		{
+			return *(this->ptr);
+		}
+		BaseIterator operator->()
+		{
+			return this;
+		}
+		BaseIterator &operator=(const BaseIterator &other)
+		{
+			this->ptr = other->ptr;
+			this->start = other->start;
+			this->end = other->end;
+		}
+	};
+
+public:
+	CustomVector()
+	{
+		this->_size = 0;
+		this->_capacity = 0;
+		this->array = nullptr;
+	}
+	CustomVector(const int &size)
+	{
+		this->assign(size, 0);
 	}
 
-	~CustomVector() { delete[] this->array; }
-	size_t size() {
+	~CustomVector()
+	{
+		delete[] this->array;
+		this->_size = 0;
+		this->_capacity = 0;
+	}
+	size_t size()
+	{
 		return this->_size;
 	}
 
-	void resize(size_t size) {
-		this->_size   = size;
+	void resize(size_t size)
+	{
+		this->_size = size;
 		this->_capacity = size;
 		this->buildArray();
 	}
 
-	bool isempty() {
+	bool isempty()
+	{
 		return this->_size == 0;
 	}
 
-	void clear() {
-		~CustomVector();
-		this->_size     = 0;
+	void clear()
+	{
+		this->~CustomVector();
+		this->_size = 0;
 		this->_capacity = 0;
-		this->array     = nullptr;
+		this->array = nullptr;
 	}
 
-	void push_back(Value value) {
-		if (this->_size >= _capacity) 
+	void push_back(const Value &value)
+	{
+		if (this->_size >= _capacity)
 		{
 			this->_capacity = this->_capacity == 0 ? 1 : newCapacity(this->_size);
 			this->buildArray();
@@ -89,187 +138,164 @@ public:
 		this->_size++;
 	}
 
-	void pop_back() 
+	void pop_back()
 	{
 		this->array[_size - 1] = 0;
 		this->_size--;
 	}
 
-	void assign(size_t newSize, const Value& value) {
+	void assign(const size_t &newSize, const Value &value)
+	{
 		this->clear();
 		this->_capacity = newCapacity(newSize);
 		this->_size = newSize;
 		this->array = new Value[_capacity];
-		for (int i = 0; i < this->_size; i++) {
+		for (int i = 0; i < this->_size; i++)
+		{
 			this->array[i] = value;
 		}
 	}
 
-	Value& operator[](size_t index) {
+	Value &operator[](const size_t &index)
+	{
 		return this->array[index];
 	}
 
-	Value& at(size_t index) {
-		if (index >= this->_size) {
+	Value &at(size_t index)
+	{
+		if (index >= this->_size)
+		{
 			// out of bounds
 			throw std::exception("Out of bounds");
 		}
-		if (index < 0) {
+		if (index < 0)
+		{
 			// go backwards
-			if (abs(index) > this->_size) index %= this->_size;
+			if (index * -1 > this->_size)
+				index %= this->_size;
 			return this->array[this->_size - index];
 		}
 		return this->array[index];
 	}
-	Value& front() {
+	Value &front()
+	{
 		return this->array[0];
 	}
-	Value& back() {
+	Value &back()
+	{
 		return this->array[this->_size - 1];
 	}
 
-	size_t capacity() {
+	size_t capacity()
+	{
 		return this->_capacity;
 	}
 
-	Value* data() {
+	Value *data()
+	{
 		return this->array;
 	}
 
-	class Iterator {
-	private:
-		Value* ptr;
-		Value* end;
-		Value* start;
+	class Iterator : public BaseIterator
+	{
 	public:
-	
-		Iterator() {
-			this->ptr   = nullptr;
-			this->end   = nullptr;
+		Iterator()
+		{
+			this->ptr = nullptr;
+			this->end = nullptr;
 			this->start = nullptr;
 		}
-		Iterator(Value* start, Value*end) {
-			this->ptr   = start;
-			this->end   = end;
+		Iterator(Value *ptr, Value *start, Value *end)
+		{
+			this->ptr = ptr;
+			this->end = end;
 			this->start = start;
 		}
-		~Iterator() {};
-		
-		void operator++(int) {
+		~Iterator() {}
+
+		void operator++(int)
+		{
 			this->ptr += 1;
-			if (this->ptr == this->end) this->ptr = nullptr;
-		};
+			if (this->ptr == this->end)
+				this->ptr = nullptr;
+		}
 
-		void operator--(int) {
+		void operator--(int)
+		{
 			this->ptr -= 1;
-			if (this->ptr < this->start) this->ptr = nullptr;
-		};
-
-		Value operator*() {
-			
-			return *(this->ptr);
-		}
-
-		Iterator* operator->() {
-			return this;
-		}
-
-		bool operator!=(Iterator other) const {
-			return other->ptr != this->ptr;
-		}
-		bool operator==(Iterator other) const {
-			if (this->ptr == nullptr) return other->ptr == nullptr;
-			return other->ptr == this->ptr;
-		}
-
-		Iterator& operator=(Iterator other) {
-			this->start = other->start;
-			this->end   = other->end;
-			this->ptr   = other->ptr;
+			if (this->ptr < this->start)
+				this->ptr = nullptr;
 		}
 	};
 
-	Iterator begin() {
-		return Iterator(this->array, this->array+this->_size);
+	Iterator begin()
+	{
+		return Iterator(this->array, this->array, this->array + this->_size);
 	}
 
-	Iterator end() {
+	Iterator end()
+	{
 		return Iterator();
 	}
 
-	Iterator cbegin()  {
+	const Iterator cbegin()
+	{
 		return this->begin();
 	}
 
-	Iterator cend()  {
+	const Iterator cend()
+	{
 		return this->end();
 	}
 
-	class ReverseIterator {
-	private:
-		Value* ptr;
-		Value* end;
-		Value* start;
+	class ReverseIterator : public BaseIterator
+	{
 	public:
-
-		ReverseIterator() {
-			this->ptr   = nullptr;
-			this->end   = nullptr;
+		ReverseIterator()
+		{
+			this->ptr = nullptr;
+			this->end = nullptr;
 			this->start = nullptr;
 		}
-		ReverseIterator(Value* start, Value* end) {
-			this->ptr   = start;
-			this->end   = end;
+		ReverseIterator(Value *ptr, Value *start, Value *end)
+		{
+			this->ptr = ptr;
+			this->end = end;
 			this->start = start;
 		}
-		~ReverseIterator() {};
+		~ReverseIterator(){};
 
-		void operator++(int) {
+		void operator++(int)
+		{
 			this->ptr -= 1;
-			if (this->ptr < this->start) this->ptr = nullptr;
+			if (this->ptr < this->start)
+				this->ptr = nullptr;
 		};
 
-		void operator--(int) {
+		void operator--(int)
+		{
 			this->ptr += 1;
-			if (this->ptr == this->end) this->ptr = nullptr;
+			if (this->ptr == this->end)
+				this->ptr = nullptr;
 		};
-
-		Value operator*() {
-			return *(this->ptr);
-		}
-
-		ReverseIterator* operator->() {
-			return this;
-		}
-
-		bool operator!=(ReverseIterator other) const {
-			return other->ptr != this->ptr;
-		}
-		bool operator==(ReverseIterator other) const {
-			if (this->ptr == nullptr) return other->ptr == nullptr;
-			return other->ptr == this->ptr;
-		}
-
-		Iterator& operator=(Iterator other) {
-			this->start = other->start;
-			this->end = other->end;
-			this->ptr = other->ptr;
-		}
 	};
-	
-	ReverseIterator rbegin() {
+
+	ReverseIterator rbegin()
+	{
 		return ReverseIterator(this->array, this->array + this->_size);
 	}
-	
-	ReverseIterator rend() {
+
+	ReverseIterator rend()
+	{
 		return ReverseIterator();
 	}
 
-	ReverseIterator crbegin() {
+	const ReverseIterator crbegin()
+	{
 		return this->rbegin();
 	}
-	ReverseIterator crend() {
+	const ReverseIterator crend()
+	{
 		return this->rend();
 	}
 };
-
